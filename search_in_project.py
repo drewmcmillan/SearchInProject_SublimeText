@@ -41,6 +41,7 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
     def run(self):
         self.settings = sublime.load_settings('SearchInProject.sublime-settings')
         self.engine_name = self.settings.get("search_in_project_engine")
+        self.map_list = self.settings.get("file_type_priority")
         pushd = os.getcwd()
         os.chdir(basedir)
         __import__("searchengines.%s" % self.engine_name)
@@ -76,7 +77,8 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
             sublime.error_message("%s running search engine %s:"%(e.__class__.__name__,self.engine_name) + "\n" + str(e))
 
     def sort_results(self,  results):
-        map = ['js', 'rb', 'json', 'py', 'md', 'spec', 'ru', 'yaml', 'sh', 'Dockerfile', 'xml']
+        file_type_priority = ['js', 'rb', 'json', 'py', 'md', 'spec', 'ru', 'yaml', 'sh', 'Dockerfile', 'xml']
+        map = self.map_list or file_type_priority
 #        Lol this is probably the hackiest code ive ever written
         return sorted(results, key=lambda x: map.index(x[0].split(":")[0].split(".")[-1].split("/")[-1]) if x[0].split(":")[0].split(".")[-1].split("/")[-1] in map else len(map))
             

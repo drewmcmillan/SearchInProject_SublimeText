@@ -48,6 +48,12 @@ Name | Description | Search in Project key
 Configuration is stored in a separate, user-specific `SearchInProject.sublime-settings` file. See the default file for configuration options; links to both could be
 found in the main menu in `Preferences -> Package Settings -> Search In Project`.
 
+```
+{
+	"search_in_project_engine": "the_silver_searcher",
+	"file_type_priority": ["js", "rb", "json", "py", "md", "spec", "ru", "yaml", "sh", "Dockerfile", "xml"]
+}```
+
 ## Issues with locating executables
 
 If Search In Project has problems with locating executables in Mac, install the [Fix Mac Path plugin](https://github.com/int3h/SublimeFixMacPath).

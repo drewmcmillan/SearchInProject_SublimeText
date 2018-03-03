@@ -50,7 +50,7 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
         selection_text = view.substr(view.sel()[0])
         self.window.show_input_panel(
             "Search in project:",
-            not "\n" in selection_text and selection_text or self.last_search_string,
+            not "\n" in selection_text and selection_text,
             self.perform_search, None, None)
         pass
 
@@ -65,9 +65,9 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
         try:
             self.results = self.engine.run(text, folders)
             if self.results:
+                self.results = self.sort_results(self.results)
                 self.results = [[result[0].replace(self.common_path.replace('\"', ''), ''), result[1][:self.MAX_RESULT_LINE_LENGTH]] for result in self.results]
-                self.results.append("``` List results in view ```")
-                self.window.show_quick_panel(self.results, self.goto_result)
+                self.window.show_quick_panel(self.results, self.goto_result, on_highlight=self.preview_result)
             else:
                 self.results = []
                 sublime.message_dialog('No results')
@@ -75,16 +75,22 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
             self.results = []
             sublime.error_message("%s running search engine %s:"%(e.__class__.__name__,self.engine_name) + "\n" + str(e))
 
-
+    def sort_results(self,  results):
+        map = ['js', 'rb', 'json', 'py', 'md', 'spec', 'ru', 'yaml', 'sh', 'Dockerfile', 'xml']
+#        Lol this is probably the hackiest code ive ever written
+        return sorted(results, key=lambda x: map.index(x[0].split(":")[0].split(".")[-1].split("/")[-1]) if x[0].split(":")[0].split(".")[-1].split("/")[-1] in map else len(map))
+            
+    def preview_result(self, file_no):
+        if file_no != -1:
+            file_name = self.common_path.replace('\"', '') + self.results[file_no][0]
+            view = self.window.open_file(file_name, sublime.TRANSIENT | sublime.ENCODED_POSITION)
+            
     def goto_result(self, file_no):
         if file_no != -1:
-            if file_no == len(self.results) - 1: # last result is "list in view"
-                self.list_in_view()
-            else:
-                file_name = self.common_path.replace('\"', '') + self.results[file_no][0]
-                view = self.window.open_file(file_name, sublime.ENCODED_POSITION)
-                regions = view.find_all(self.last_search_string)
-                view.add_regions("search_in_project", regions, "entity.name.filename.find-in-files", "circle", sublime.DRAW_OUTLINED)
+            file_name = self.common_path.replace('\"', '') + self.results[file_no][0]
+            view = self.window.open_file(file_name, sublime.ENCODED_POSITION)
+            regions = view.find_all(self.last_search_string)
+            view.add_regions("search_in_project", regions, "entity.name.filename.find-in-files", "circle", sublime.DRAW_OUTLINED)
 
     def list_in_view(self):
         self.results.pop()

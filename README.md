@@ -52,7 +52,8 @@ found in the main menu in `Preferences -> Package Settings -> Search In Project`
 {
 	"search_in_project_engine": "the_silver_searcher",
 	"file_type_priority": ["js", "rb", "json", "py", "md", "spec", "ru", "yaml", "sh", "Dockerfile", "xml"]
-}```
+}
+```
 
 ## Issues with locating executables
 
